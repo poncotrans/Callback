@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Callback Handler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Callback Handler</h1>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Data callback (Simulasi data yang diterima dari callback)
+        const key = 'API_KEY_ANDA';
+        const pay_id = 'PAY_ID_DARI_PAYDISINI';
+        const unique_code = 'KODE_UNIK_DARI_MERCHANT';
+        const status = 'Success'; // atau 'Canceled'
+        const received_signature = 'SIGNATURE_YANG_DITERIMA';
+
+        // Fungsi untuk membuat signature yang diharapkan
+        function generateExpectedSignature(key, unique_code) {
+            return md5(key + unique_code + 'CallbackStatus');
+        }
+
+        // Fungsi untuk menghandle callback
+        function handleCallback(key, pay_id, unique_code, status, received_signature) {
+            const expected_signature = generateExpectedSignature(key, unique_code);
+
+            if (expected_signature !== received_signature) {
+                return { status: 'error', message: 'Invalid signature' };
+            }
+
+            switch (status) {
+                case 'Success':
+                    return { status: 'success', message: 'Transaction successful' };
+                case 'Canceled':
+                    return { status: 'error', message: 'Transaction canceled' };
+                default:
+                    return { status: 'error', message: 'Unknown status' };
+            }
+        }
+
+        // Fungsi untuk menampilkan hasil ke halaman
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            if (result.status === 'success') {
+                resultDiv.className = 'success';
+            } else {
+                resultDiv.className = 'error';
+            }
+            resultDiv.textContent = result.message;
+        }
+
+        // Menangani callback dan menampilkan hasil
+        const result = handleCallback(key, pay_id, unique_code, status, received_signature);
+        displayResult(result);
+    </script>
+
+    <!-- Tambahkan library md5.js untuk menghitung md5 hash -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+</body>
+</html>
